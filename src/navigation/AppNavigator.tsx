@@ -8,6 +8,7 @@ import { Habit } from '../types';
 
 // Screens
 import AddHabitScreen from '../screens/AddHabitScreen';
+import AddReminderScreen from '../screens/AddReminderScreen';
 import AnalyticsScreen from '../screens/AnalyticsScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import HabitDetailScreen from '../screens/HabitDetailScreen';
@@ -18,6 +19,7 @@ export type RootStackParamList = {
     Main: undefined;
     HabitDetail: { habit: Habit };
     AddHabit: undefined;
+    AddReminder: undefined;
 };
 
 export type TabParamList = {
@@ -97,6 +99,16 @@ export default function AppNavigator() {
                     options={{
                         presentation: 'modal',
                         title: 'New Habit',
+                        headerStyle: { backgroundColor: theme === 'dark' ? '#1F2937' : '#FFF' },
+                        headerTintColor: theme === 'dark' ? '#FFF' : '#000',
+                    }}
+                />
+                <Stack.Screen
+                    name="AddReminder"
+                    component={AddReminderScreen}
+                    options={{
+                        presentation: 'modal',
+                        title: 'New Reminder',
                         headerStyle: { backgroundColor: theme === 'dark' ? '#1F2937' : '#FFF' },
                         headerTintColor: theme === 'dark' ? '#FFF' : '#000',
                     }}

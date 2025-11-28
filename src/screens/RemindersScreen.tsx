@@ -1,19 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../constants/theme';
+import { reminderService } from '../database/reminderService';
+import { RootStackParamList } from '../navigation/AppNavigator';
 import { Reminder } from '../types';
 
 export default function RemindersScreen() {
     const { colors } = useTheme();
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const [reminders, setReminders] = useState<Reminder[]>([]);
 
     const loadReminders = async () => {
-        // In a real app, we'd fetch all reminders across habits
-        // For now, mocking or fetching for a specific habit
-        // const data = await reminderService.getReminders(1); 
-        // setReminders(data);
+        const data = await reminderService.getAllReminders();
+        setReminders(data);
     };
 
     useFocusEffect(
@@ -22,8 +24,14 @@ export default function RemindersScreen() {
         }, [])
     );
 
-    const toggleReminder = (id: number) => {
-        // Logic to toggle reminder
+    const toggleReminder = async (id: number, currentValue: boolean) => {
+        await reminderService.toggleReminder(id, !currentValue);
+        loadReminders();
+    };
+
+    const deleteReminder = async (id: number) => {
+        await reminderService.deleteReminder(id);
+        loadReminders();
     };
 
     return (
@@ -33,15 +41,27 @@ export default function RemindersScreen() {
                 keyExtractor={item => item.id.toString()}
                 renderItem={({ item }) => (
                     <View style={[styles.item, { backgroundColor: colors.card, borderColor: colors.border }]}>
-                        <View>
+                        <View style={styles.itemContent}>
                             <Text style={[styles.time, { color: colors.text }]}>{item.time}</Text>
                             <Text style={[styles.habit, { color: colors.textSecondary }]}>{item.habitName}</Text>
+                            <View style={styles.daysContainer}>
+                                {item.days.map(d => (
+                                    <Text key={d} style={[styles.dayText, { color: colors.textSecondary }]}>
+                                        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][d - 1]}
+                                    </Text>
+                                ))}
+                            </View>
                         </View>
-                        <Switch
-                            value={item.enabled}
-                            onValueChange={() => toggleReminder(item.id)}
-                            trackColor={{ false: colors.border, true: colors.tint }}
-                        />
+                        <View style={styles.actions}>
+                            <Switch
+                                value={item.enabled}
+                                onValueChange={() => toggleReminder(item.id, !!item.enabled)}
+                                trackColor={{ false: colors.border, true: colors.tint }}
+                            />
+                            <TouchableOpacity onPress={() => deleteReminder(item.id)} style={styles.deleteBtn}>
+                                <Ionicons name="trash-outline" size={20} color={colors.danger} />
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 )}
                 ListEmptyComponent={
@@ -51,9 +71,9 @@ export default function RemindersScreen() {
 
             <TouchableOpacity
                 style={[styles.fab, { backgroundColor: colors.tint }]}
-            // onPress={() => navigation.navigate('AddReminder')}
+                onPress={() => navigation.navigate('AddReminder')}
             >
-                <Ionicons name="alarm" size={24} color="#FFF" />
+                <Ionicons name="add" size={24} color="#FFF" />
             </TouchableOpacity>
         </View>
     );
@@ -73,12 +93,29 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         borderWidth: 1,
     },
+    itemContent: {
+        flex: 1,
+    },
+    actions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
     time: {
         fontSize: 18,
         fontWeight: '600',
     },
     habit: {
         fontSize: 14,
+        marginTop: 4,
+    },
+    daysContainer: {
+        flexDirection: 'row',
+        gap: 8,
+        marginTop: 4,
+    },
+    dayText: {
+        fontSize: 12,
     },
     empty: {
         textAlign: 'center',
@@ -96,4 +133,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         elevation: 4,
     },
+    deleteBtn: {
+        padding: 4,
+    }
 });

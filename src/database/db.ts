@@ -34,9 +34,21 @@ export const initDB = async (): Promise<SQLite.SQLiteDatabase> => {
       time TEXT NOT NULL,
       days TEXT, -- JSON array of days [1, 2, 3]
       notification_id TEXT,
+      enabled INTEGER DEFAULT 1, -- Boolean 0 or 1
       FOREIGN KEY (habit_id) REFERENCES habits (id) ON DELETE CASCADE
     );
   `);
+
+  // Migration: Add enabled column if it doesn't exist
+  try {
+    const tableInfo = await db.getAllAsync<any>("PRAGMA table_info(reminders)");
+    const hasEnabled = tableInfo.some(col => col.name === 'enabled');
+    if (!hasEnabled) {
+      await db.execAsync('ALTER TABLE reminders ADD COLUMN enabled INTEGER DEFAULT 1');
+    }
+  } catch (e) {
+    console.error('Migration failed:', e);
+  }
 
   console.log('Database initialized');
   return db;
