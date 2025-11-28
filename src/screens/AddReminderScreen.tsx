@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../constants/theme';
 import { habitService } from '../database/habitService';
 import { reminderService } from '../database/reminderService';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { Habit } from '../types';
+import { requestPermissions, scheduleNotification, scheduleNotificationInSeconds } from '../utils/notificationManager';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AddReminder'>;
 
@@ -38,6 +39,35 @@ export default function AddReminderScreen({ navigation }: Props) {
         }
     };
 
+    const handleTestNotification = async () => {
+        try {
+            const hasPermission = await requestPermissions();
+            if (!hasPermission) {
+                Alert.alert(
+                    'Permission Required',
+                    'Please enable notifications to receive reminders.',
+                    [{ text: 'OK' }]
+                );
+                return;
+            }
+
+            await scheduleNotificationInSeconds(
+                'Test Notification',
+                'This is a test! Your notifications are working! 🎉',
+                10 // 10 seconds
+            );
+
+            Alert.alert(
+                'Test Scheduled',
+                'You will receive a test notification in 10 seconds. You can close the app now!',
+                [{ text: 'OK' }]
+            );
+        } catch (e) {
+            Alert.alert('Error', 'Failed to schedule test notification');
+            console.error('Error scheduling test:', e);
+        }
+    };
+
     const handleSave = async () => {
         setError('');
 
@@ -59,11 +89,43 @@ export default function AddReminderScreen({ navigation }: Props) {
         }
 
         try {
+            // Request notification permissions
+            const hasPermission = await requestPermissions();
+            if (!hasPermission) {
+                Alert.alert(
+                    'Permission Required',
+                    'Please enable notifications to receive reminders.',
+                    [{ text: 'OK' }]
+                );
+                return;
+            }
+
+            // Parse time
+            const [hourStr, minuteStr] = time.split(':');
+            const hour = parseInt(hourStr, 10);
+            const minute = parseInt(minuteStr, 10);
+
+            // Get habit name for notification
+            const habit = habits.find(h => h.id === selectedHabitId);
+            if (!habit) {
+                setError('Selected habit not found');
+                return;
+            }
+
+            // Schedule notification
+            const notificationId = await scheduleNotification(
+                'Habit Reminder',
+                `Time to ${habit.name}!`,
+                hour,
+                minute
+            );
+
+            // Save to database
             await reminderService.addReminder(
                 selectedHabitId,
                 time,
                 selectedDays.length > 0 ? selectedDays : [1, 2, 3, 4, 5, 6, 7], // Default to all days if none selected
-                Date.now().toString() // Simple ID for now
+                notificationId
             );
 
             navigation.goBack();
@@ -78,6 +140,17 @@ export default function AddReminderScreen({ navigation }: Props) {
     return (
         <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={styles.form}>
+                {/* Test Notification Button */}
+                <TouchableOpacity
+                    style={[styles.testButton, { backgroundColor: colors.surface, borderColor: colors.border }]}
+                    onPress={handleTestNotification}
+                >
+                    <Ionicons name="notifications-outline" size={20} color={colors.tint} />
+                    <Text style={[styles.testButtonText, { color: colors.tint }]}>
+                        Test Notification (10 sec)
+                    </Text>
+                </TouchableOpacity>
+
                 <Text style={[styles.label, { color: colors.text }]}>Select Habit</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.habitList}>
                     {habits.map(habit => (
@@ -164,6 +237,20 @@ const styles = StyleSheet.create({
     },
     form: {
         padding: 16,
+    },
+    testButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        padding: 12,
+        borderRadius: 8,
+        borderWidth: 1,
+        marginBottom: 16,
+    },
+    testButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
     },
     label: {
         fontSize: 16,

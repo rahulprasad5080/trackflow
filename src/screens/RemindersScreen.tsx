@@ -7,6 +7,7 @@ import { useTheme } from '../constants/theme';
 import { reminderService } from '../database/reminderService';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { Reminder } from '../types';
+import { cancelNotification } from '../utils/notificationManager';
 
 export default function RemindersScreen() {
     const { colors } = useTheme();
@@ -25,11 +26,21 @@ export default function RemindersScreen() {
     );
 
     const toggleReminder = async (id: number, currentValue: boolean) => {
+        const reminder = reminders.find(r => r.id === id);
+        if (reminder && currentValue) {
+            // If turning off, cancel the notification
+            await cancelNotification(reminder.notification_id);
+        }
         await reminderService.toggleReminder(id, !currentValue);
         loadReminders();
     };
 
     const deleteReminder = async (id: number) => {
+        const reminder = reminders.find(r => r.id === id);
+        if (reminder) {
+            // Cancel the notification before deleting
+            await cancelNotification(reminder.notification_id);
+        }
         await reminderService.deleteReminder(id);
         loadReminders();
     };
