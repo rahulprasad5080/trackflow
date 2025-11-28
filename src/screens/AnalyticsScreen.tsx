@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Calendar } from '../components/Calendar';
 import { HeatSquare } from '../components/HeatSquare';
 import { MonthSwitcher } from '../components/MonthSwitcher';
 import { useTheme } from '../constants/theme';
@@ -21,13 +22,17 @@ export default function AnalyticsScreen() {
     return (
         <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={styles.content}>
-                <Text style={[styles.title, { color: colors.text }]}>Activity Heatmap</Text>
+                <Text style={[styles.title, { color: colors.text }]}>Activity Calendar</Text>
 
                 <MonthSwitcher
                     currentMonth={currentMonth}
                     onPrev={() => setCurrentMonth(getPreviousMonth(currentMonth))}
                     onNext={() => setCurrentMonth(getNextMonth(currentMonth))}
                 />
+
+                <Calendar days={days} getCountForDay={getCountForDay} />
+
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Heatmap Grid</Text>
 
                 <View style={styles.heatmapGrid}>
                     {days.map((day, index) => {
@@ -57,6 +62,12 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 24,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginTop: 24,
+        marginBottom: 12,
     },
     heatmapGrid: {
         flexDirection: 'row',
