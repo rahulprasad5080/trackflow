@@ -1,11 +1,23 @@
+import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useTheme } from '../constants/theme';
+import { Habit } from '../types';
 
-export const HabitFilterChips = ({ habits, selectedId, onSelect }) => {
+interface HabitFilterChipsProps {
+    habits: Habit[];
+    selectedId: number | null;
+    onSelect: (id: number | null) => void;
+}
+
+export const HabitFilterChips = ({ habits, selectedId, onSelect }: HabitFilterChipsProps) => {
     const { colors } = useTheme();
 
     return (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.container}>
+        <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.container}
+        >
             <TouchableOpacity
                 style={[
                     styles.chip,
@@ -29,10 +41,10 @@ export const HabitFilterChips = ({ habits, selectedId, onSelect }) => {
                             borderColor: colors.border
                         }
                     ]}
-                    onPress={() => onSelect(habit.id)}
+                    onPress={() => onSelect(habit.id === selectedId ? null : habit.id)}
                 >
                     <Text style={{ color: selectedId === habit.id ? '#FFF' : colors.text }}>
-                        {habit.name}
+                        {habit.icon} {habit.name}
                     </Text>
                 </TouchableOpacity>
             ))}
@@ -43,13 +55,14 @@ export const HabitFilterChips = ({ habits, selectedId, onSelect }) => {
 const styles = StyleSheet.create({
     container: {
         paddingHorizontal: 16,
-        marginBottom: 16,
+        paddingBottom: 12,
+        gap: 8,
     },
     chip: {
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 20,
-        marginRight: 8,
         borderWidth: 1,
+        marginRight: 8,
     },
 });

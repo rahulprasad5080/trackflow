@@ -1,32 +1,46 @@
 import { Ionicons } from '@expo/vector-icons';
+import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../constants/theme';
+import { Habit } from '../types';
 
-export const HabitCard = ({ habit, onLog, onDetail }) => {
+interface HabitCardProps {
+    habit: Habit;
+    onLog: (habit: Habit) => void;
+    onDetail: (habit: Habit) => void;
+}
+
+export const HabitCard = ({ habit, onLog, onDetail }: HabitCardProps) => {
     const { colors } = useTheme();
+    const isCompleted = habit.completed === 1;
 
     return (
         <TouchableOpacity
             style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}
-            onPress={onDetail}
+            onPress={() => onDetail(habit)}
         >
             <View style={[styles.iconContainer, { backgroundColor: habit.color + '20' }]}>
-                <Ionicons name={habit.icon || 'star'} size={24} color={habit.color} />
+                <Text style={{ fontSize: 24 }}>{habit.icon}</Text>
             </View>
+
             <View style={styles.info}>
-                <Text style={[styles.name, { color: colors.text }]}>{habit.name}</Text>
-                <Text style={[styles.goal, { color: colors.textSecondary }]}>
-                    {habit.value || 0} / {habit.goal} {habit.unit}
+                <Text style={[styles.title, { color: colors.text }]}>{habit.name}</Text>
+                <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                    {habit.value} / {habit.goal} {habit.unit}
                 </Text>
             </View>
+
             <TouchableOpacity
-                style={[styles.button, { backgroundColor: habit.completed ? colors.tint : colors.surface }]}
+                style={[
+                    styles.button,
+                    { backgroundColor: isCompleted ? colors.secondary : colors.tint }
+                ]}
                 onPress={() => onLog(habit)}
             >
                 <Ionicons
-                    name={habit.completed ? "checkmark" : "add"}
+                    name={isCompleted ? "checkmark" : "add"}
                     size={24}
-                    color={habit.completed ? '#FFF' : colors.text}
+                    color="#FFF"
                 />
             </TouchableOpacity>
         </TouchableOpacity>
@@ -37,28 +51,33 @@ const styles = StyleSheet.create({
     card: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 16,
+        padding: 12,
         borderRadius: 16,
-        borderWidth: 1,
         marginBottom: 12,
+        borderWidth: 1,
+        elevation: 2,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
     },
     iconContainer: {
-        width: 48,
-        height: 48,
-        borderRadius: 12,
+        width: 50,
+        height: 50,
+        borderRadius: 25,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 16,
+        marginRight: 12,
     },
     info: {
         flex: 1,
     },
-    name: {
+    title: {
         fontSize: 16,
         fontWeight: '600',
         marginBottom: 4,
     },
-    goal: {
+    subtitle: {
         fontSize: 14,
     },
     button: {

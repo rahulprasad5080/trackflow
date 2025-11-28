@@ -2,7 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React from 'react';
 import { useTheme } from '../constants/theme';
+import { Habit } from '../types';
 
 // Screens
 import AddHabitScreen from '../screens/AddHabitScreen';
@@ -12,8 +14,21 @@ import HabitDetailScreen from '../screens/HabitDetailScreen';
 import RemindersScreen from '../screens/RemindersScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 
-const Tab = createBottomTabNavigator();
-const Stack = createNativeStackNavigator();
+export type RootStackParamList = {
+    Main: undefined;
+    HabitDetail: { habit: Habit };
+    AddHabit: undefined;
+};
+
+export type TabParamList = {
+    Dashboard: undefined;
+    Analytics: undefined;
+    Reminders: undefined;
+    Settings: undefined;
+};
+
+const Tab = createBottomTabNavigator<TabParamList>();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function TabNavigator() {
     const { colors, theme } = useTheme();
@@ -22,7 +37,7 @@ function TabNavigator() {
         <Tab.Navigator
             screenOptions={({ route }) => ({
                 tabBarIcon: ({ focused, color, size }) => {
-                    let iconName;
+                    let iconName: keyof typeof Ionicons.glyphMap = 'help';
 
                     if (route.name === 'Dashboard') {
                         iconName = focused ? 'home' : 'home-outline';
@@ -57,26 +72,11 @@ function TabNavigator() {
 }
 
 export default function AppNavigator() {
-    const { colors, theme } = useTheme();
+    const { theme } = useTheme();
 
     return (
-        <NavigationContainer theme={{
-            dark: theme === 'dark',
-            colors: {
-                primary: colors.tint,
-                background: colors.background,
-                card: colors.card,
-                text: colors.text,
-                border: colors.border,
-                notification: colors.danger,
-            }
-        }}>
-            <Stack.Navigator
-                screenOptions={{
-                    headerStyle: { backgroundColor: colors.card },
-                    headerTintColor: colors.text,
-                }}
-            >
+        <NavigationContainer>
+            <Stack.Navigator>
                 <Stack.Screen
                     name="Main"
                     component={TabNavigator}
@@ -85,12 +85,21 @@ export default function AppNavigator() {
                 <Stack.Screen
                     name="HabitDetail"
                     component={HabitDetailScreen}
-                    options={{ title: 'Habit Details' }}
+                    options={{
+                        title: 'Habit Details',
+                        headerStyle: { backgroundColor: theme === 'dark' ? '#1F2937' : '#FFF' },
+                        headerTintColor: theme === 'dark' ? '#FFF' : '#000',
+                    }}
                 />
                 <Stack.Screen
                     name="AddHabit"
                     component={AddHabitScreen}
-                    options={{ title: 'New Habit', presentation: 'modal' }}
+                    options={{
+                        presentation: 'modal',
+                        title: 'New Habit',
+                        headerStyle: { backgroundColor: theme === 'dark' ? '#1F2937' : '#FFF' },
+                        headerTintColor: theme === 'dark' ? '#FFF' : '#000',
+                    }}
                 />
             </Stack.Navigator>
         </NavigationContainer>

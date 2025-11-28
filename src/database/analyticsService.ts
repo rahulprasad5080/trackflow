@@ -1,9 +1,9 @@
 import { getDB } from './db';
 
 export const analyticsService = {
-    getMonthlyHeatmap: async (monthStart, monthEnd) => {
+    getMonthlyHeatmap: async (monthStart: string, monthEnd: string): Promise<{ date: string; count: number }[]> => {
         const db = getDB();
-        return await db.getAllAsync(
+        return await db.getAllAsync<{ date: string; count: number }>(
             `SELECT date, COUNT(*) as count 
        FROM logs 
        WHERE date >= ? AND date <= ? AND value > 0 
@@ -12,9 +12,9 @@ export const analyticsService = {
         );
     },
 
-    getHabitStats: async (habitId) => {
+    getHabitStats: async (habitId: number): Promise<{ count: number } | null> => {
         const db = getDB();
-        const total = await db.getFirstAsync(
+        const total = await db.getFirstAsync<{ count: number }>(
             'SELECT COUNT(*) as count FROM logs WHERE habit_id = ? AND value > 0',
             [habitId]
         );

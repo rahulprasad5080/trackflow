@@ -1,19 +1,28 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useState } from 'react';
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { CompositeScreenProps, useFocusEffect } from '@react-navigation/native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import React, { useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { HabitCard } from '../components/HabitCard';
 import { HabitFilterChips } from '../components/HabitFilterChips';
 import { SummaryCard } from '../components/SummaryCard';
 import { useTheme } from '../constants/theme';
 import { habitService } from '../database/habitService';
+import { RootStackParamList, TabParamList } from '../navigation/AppNavigator';
+import { Habit } from '../types';
 import { getToday } from '../utils/dateUtils';
 
-export default function DashboardScreen({ navigation }) {
+type Props = CompositeScreenProps<
+    BottomTabScreenProps<TabParamList, 'Dashboard'>,
+    NativeStackScreenProps<RootStackParamList>
+>;
+
+export default function DashboardScreen({ navigation }: Props) {
     const { colors } = useTheme();
-    const [habits, setHabits] = useState([]);
-    const [logs, setLogs] = useState([]);
-    const [filterId, setFilterId] = useState(null);
+    const [habits, setHabits] = useState<Habit[]>([]);
+    const [logs, setLogs] = useState<any[]>([]);
+    const [filterId, setFilterId] = useState<number | null>(null);
     const [refreshing, setRefreshing] = useState(false);
     const today = getToday();
 
@@ -43,8 +52,8 @@ export default function DashboardScreen({ navigation }) {
         setRefreshing(false);
     };
 
-    const handleLog = async (habit) => {
-        const newValue = habit.value + 1;
+    const handleLog = async (habit: Habit) => {
+        const newValue = (habit.value || 0) + 1;
         await habitService.logHabit(habit.id, today, newValue);
         loadData(); // Refresh UI
     };

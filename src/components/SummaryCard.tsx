@@ -1,7 +1,13 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '../constants/theme';
 
-export const SummaryCard = ({ title, value, subtitle }) => {
+interface SummaryCardProps {
+    title: string;
+    value: string;
+    subtitle?: string;
+}
+
+export const SummaryCard = ({ title, value, subtitle }: SummaryCardProps) => {
     const { colors } = useTheme();
 
     return (

@@ -1,28 +1,29 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../constants/theme';
+import { Reminder } from '../types';
 
 export default function RemindersScreen() {
     const { colors } = useTheme();
-    const [reminders, setReminders] = useState([]);
-
-    useEffect(() => {
-        loadReminders();
-    }, []);
+    const [reminders, setReminders] = useState<Reminder[]>([]);
 
     const loadReminders = async () => {
-        // Mock for now, would fetch from DB
-        setReminders([
-            { id: 1, habitName: 'Drink Water', time: '09:00 AM', enabled: true },
-            { id: 2, habitName: 'Exercise', time: '06:00 PM', enabled: false },
-        ]);
+        // In a real app, we'd fetch all reminders across habits
+        // For now, mocking or fetching for a specific habit
+        // const data = await reminderService.getReminders(1); 
+        // setReminders(data);
     };
 
-    const toggleReminder = (id) => {
-        setReminders(prev => prev.map(r =>
-            r.id === id ? { ...r, enabled: !r.enabled } : r
-        ));
+    useFocusEffect(
+        useCallback(() => {
+            loadReminders();
+        }, [])
+    );
+
+    const toggleReminder = (id: number) => {
+        // Logic to toggle reminder
     };
 
     return (
@@ -33,21 +34,26 @@ export default function RemindersScreen() {
                 renderItem={({ item }) => (
                     <View style={[styles.item, { backgroundColor: colors.card, borderColor: colors.border }]}>
                         <View>
-                            <Text style={[styles.habitName, { color: colors.text }]}>{item.habitName}</Text>
-                            <Text style={[styles.time, { color: colors.textSecondary }]}>{item.time}</Text>
+                            <Text style={[styles.time, { color: colors.text }]}>{item.time}</Text>
+                            <Text style={[styles.habit, { color: colors.textSecondary }]}>{item.habitName}</Text>
                         </View>
                         <Switch
                             value={item.enabled}
                             onValueChange={() => toggleReminder(item.id)}
-                            trackColor={{ true: colors.tint }}
+                            trackColor={{ false: colors.border, true: colors.tint }}
                         />
                     </View>
                 )}
-                contentContainerStyle={styles.list}
+                ListEmptyComponent={
+                    <Text style={[styles.empty, { color: colors.textSecondary }]}>No reminders set</Text>
+                }
             />
 
-            <TouchableOpacity style={[styles.fab, { backgroundColor: colors.tint }]}>
-                <Ionicons name="add" size={24} color="#FFF" />
+            <TouchableOpacity
+                style={[styles.fab, { backgroundColor: colors.tint }]}
+            // onPress={() => navigation.navigate('AddReminder')}
+            >
+                <Ionicons name="alarm" size={24} color="#FFF" />
             </TouchableOpacity>
         </View>
     );
@@ -57,25 +63,27 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    list: {
-        padding: 16,
-    },
     item: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: 16,
+        marginHorizontal: 16,
+        marginTop: 16,
         borderRadius: 12,
         borderWidth: 1,
-        marginBottom: 12,
-    },
-    habitName: {
-        fontSize: 16,
-        fontWeight: '600',
     },
     time: {
+        fontSize: 18,
+        fontWeight: '600',
+    },
+    habit: {
         fontSize: 14,
-        marginTop: 4,
+    },
+    empty: {
+        textAlign: 'center',
+        marginTop: 40,
+        fontSize: 16,
     },
     fab: {
         position: 'absolute',

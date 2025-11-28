@@ -1,9 +1,13 @@
-import { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../constants/theme';
 import { habitService } from '../database/habitService';
+import { RootStackParamList } from '../navigation/AppNavigator';
 
-export default function AddHabitScreen({ navigation }) {
+type Props = NativeStackScreenProps<RootStackParamList, 'AddHabit'>;
+
+export default function AddHabitScreen({ navigation }: Props) {
     const { colors } = useTheme();
     const [name, setName] = useState('');
     const [goal, setGoal] = useState('1');
@@ -14,17 +18,17 @@ export default function AddHabitScreen({ navigation }) {
 
         await habitService.createHabit({
             name,
-            goal: parseInt(goal),
+            goal: parseInt(goal) || 1,
             unit,
-            icon: 'star', // Default
-            color: '#4F46E5', // Default
+            icon: 'star', // Default icon
+            color: colors.tint, // Default color
         });
 
         navigation.goBack();
     };
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={styles.form}>
                 <Text style={[styles.label, { color: colors.text }]}>Habit Name</Text>
                 <TextInput
@@ -48,8 +52,6 @@ export default function AddHabitScreen({ navigation }) {
                     style={[styles.input, { backgroundColor: colors.surface, color: colors.text }]}
                     value={unit}
                     onChangeText={setUnit}
-                    placeholder="e.g. glasses"
-                    placeholderTextColor={colors.textSecondary}
                 />
 
                 <TouchableOpacity
@@ -59,34 +61,33 @@ export default function AddHabitScreen({ navigation }) {
                     <Text style={styles.buttonText}>Create Habit</Text>
                 </TouchableOpacity>
             </View>
-        </View>
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 16,
     },
     form: {
-        marginTop: 24,
+        padding: 16,
     },
     label: {
         fontSize: 16,
+        fontWeight: '600',
         marginBottom: 8,
-        fontWeight: '500',
+        marginTop: 16,
     },
     input: {
-        padding: 16,
-        borderRadius: 12,
-        marginBottom: 24,
+        padding: 12,
+        borderRadius: 8,
         fontSize: 16,
     },
     button: {
+        marginTop: 32,
         padding: 16,
         borderRadius: 12,
         alignItems: 'center',
-        marginTop: 24,
     },
     buttonText: {
         color: '#FFF',

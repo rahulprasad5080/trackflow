@@ -1,9 +1,15 @@
+import React from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../constants/theme';
 
-// Simple Modal implementation for BottomSheet. 
-// Can be upgraded to @gorhom/bottom-sheet for better gestures.
-export const BottomSheet = ({ visible, onClose, children, title }) => {
+interface BottomSheetProps {
+    visible: boolean;
+    onClose: () => void;
+    children: React.ReactNode;
+    title?: string;
+}
+
+export const BottomSheet = ({ visible, onClose, children, title }: BottomSheetProps) => {
     const { colors } = useTheme();
 
     return (

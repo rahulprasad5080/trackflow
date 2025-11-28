@@ -1,7 +1,7 @@
 import { getDB } from './db';
 
 export const streakService = {
-    getCurrentStreak: async (habitId) => {
+    getCurrentStreak: async (habitId: number): Promise<number> => {
         const db = getDB();
         // This is a simplified streak calculation. 
         // Real implementation would need recursive query or fetching all logs.

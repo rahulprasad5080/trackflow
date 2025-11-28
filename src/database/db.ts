@@ -1,11 +1,11 @@
 import * as SQLite from 'expo-sqlite';
 
-let db;
+let db: SQLite.SQLiteDatabase;
 
-export const initDB = async () => {
-    db = await SQLite.openDatabaseAsync('trackflow.db');
+export const initDB = async (): Promise<SQLite.SQLiteDatabase> => {
+  db = await SQLite.openDatabaseAsync('trackflow.db');
 
-    await db.execAsync(`
+  await db.execAsync(`
     PRAGMA foreign_keys = ON;
     
     CREATE TABLE IF NOT EXISTS habits (
@@ -38,13 +38,13 @@ export const initDB = async () => {
     );
   `);
 
-    console.log('Database initialized');
-    return db;
+  console.log('Database initialized');
+  return db;
 };
 
-export const getDB = () => {
-    if (!db) {
-        throw new Error('Database not initialized. Call initDB() first.');
-    }
-    return db;
+export const getDB = (): SQLite.SQLiteDatabase => {
+  if (!db) {
+    throw new Error('Database not initialized. Call initDB() first.');
+  }
+  return db;
 };

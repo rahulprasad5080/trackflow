@@ -1,9 +1,12 @@
+import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTheme } from '../constants/theme';
 
-// Simplified Bar Chart using Views for now. 
-// Can be upgraded to Victory or Recharts if needed.
-export const WeeklyBarChart = ({ data }) => {
+interface WeeklyBarChartProps {
+    data: { value: number }[];
+}
+
+export const WeeklyBarChart = ({ data }: WeeklyBarChartProps) => {
     const { colors } = useTheme();
     const max = Math.max(...data.map(d => d.value), 1);
 
@@ -15,7 +18,7 @@ export const WeeklyBarChart = ({ data }) => {
                         style={[
                             styles.bar,
                             {
-                                height: (d.value / max) * 100 + '%',
+                                height: `${(d.value / max) * 100}%`,
                                 backgroundColor: d.value > 0 ? colors.tint : colors.border
                             }
                         ]}

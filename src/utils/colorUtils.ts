@@ -1,6 +1,6 @@
 import { COLORS } from '../constants/colors';
 
-export const getHeatmapColor = (count, theme = 'light') => {
+export const getHeatmapColor = (count: number, theme: 'light' | 'dark' = 'light'): string => {
     const palette = COLORS.heatmap;
     const isDark = theme === 'dark';
 

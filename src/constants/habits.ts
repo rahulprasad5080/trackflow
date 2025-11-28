@@ -1,4 +1,6 @@
-export const DEFAULT_HABITS = [
+import { Habit } from '../types';
+
+export const DEFAULT_HABITS: Partial<Habit>[] = [
     {
         id: 1,
         name: 'Drink Water',

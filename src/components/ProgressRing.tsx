@@ -6,7 +6,13 @@ import { useTheme } from '../constants/theme';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-export const ProgressRing = ({ progress, size = 100, strokeWidth = 10 }) => {
+interface ProgressRingProps {
+    progress: number;
+    size?: number;
+    strokeWidth?: number;
+}
+
+export const ProgressRing = ({ progress, size = 100, strokeWidth = 10 }: ProgressRingProps) => {
     const { colors } = useTheme();
     const radius = (size - strokeWidth) / 2;
     const circumference = radius * 2 * Math.PI;
