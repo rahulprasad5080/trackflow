@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -15,6 +16,7 @@ export default function AddReminderScreen({ navigation }: Props) {
     const [selectedHabitId, setSelectedHabitId] = useState<number | null>(null);
     const [time, setTime] = useState('');
     const [selectedDays, setSelectedDays] = useState<number[]>([]);
+    const [error, setError] = useState('');
 
     useEffect(() => {
         loadHabits();
@@ -37,23 +39,38 @@ export default function AddReminderScreen({ navigation }: Props) {
     };
 
     const handleSave = async () => {
-        if (!selectedHabitId || !time) return;
+        setError('');
+
+        if (!selectedHabitId) {
+            setError('Please select a habit');
+            return;
+        }
+
+        if (!time) {
+            setError('Please enter a time');
+            return;
+        }
 
         // Basic validation for time format HH:MM
         const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
         if (!timeRegex.test(time)) {
-            alert('Please enter time in HH:MM format');
+            setError('Please enter time in HH:MM format (e.g., 08:00)');
             return;
         }
 
-        await reminderService.addReminder(
-            selectedHabitId,
-            time,
-            selectedDays.length > 0 ? selectedDays : [1, 2, 3, 4, 5, 6, 7], // Default to all days if none selected
-            Date.now().toString() // Simple ID for now
-        );
+        try {
+            await reminderService.addReminder(
+                selectedHabitId,
+                time,
+                selectedDays.length > 0 ? selectedDays : [1, 2, 3, 4, 5, 6, 7], // Default to all days if none selected
+                Date.now().toString() // Simple ID for now
+            );
 
-        navigation.goBack();
+            navigation.goBack();
+        } catch (e) {
+            setError('Failed to save reminder. Please try again.');
+            console.error('Error saving reminder:', e);
+        }
     };
 
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -123,6 +140,13 @@ export default function AddReminderScreen({ navigation }: Props) {
                     ))}
                 </View>
 
+                {error ? (
+                    <View style={[styles.errorContainer, { backgroundColor: colors.danger + '20', borderColor: colors.danger }]}>
+                        <Ionicons name="alert-circle" size={20} color={colors.danger} />
+                        <Text style={[styles.errorText, { color: colors.danger }]}>{error}</Text>
+                    </View>
+                ) : null}
+
                 <TouchableOpacity
                     style={[styles.button, { backgroundColor: colors.tint }]}
                     onPress={handleSave}
@@ -183,6 +207,19 @@ const styles = StyleSheet.create({
     dayText: {
         fontSize: 12,
         fontWeight: '600',
+    },
+    errorContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        padding: 12,
+        borderRadius: 8,
+        marginTop: 16,
+        borderWidth: 1,
+    },
+    errorText: {
+        fontSize: 14,
+        flex: 1,
     },
     button: {
         marginTop: 32,
