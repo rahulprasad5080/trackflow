@@ -12,6 +12,7 @@ Notifications.setNotificationHandler({
 
 export const scheduleNotification = async (title: string, body: string, hour: number, minute: number) => {
     const trigger: Notifications.DailyTriggerInput = {
+        type: Notifications.SchedulableTriggerInputTypes.DAILY,
         hour,
         minute,
     };
@@ -22,7 +23,7 @@ export const scheduleNotification = async (title: string, body: string, hour: nu
             body,
             sound: true,
         },
-        trigger,
+        trigger: trigger,
     });
     return id;
 };
