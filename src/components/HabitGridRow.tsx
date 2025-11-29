@@ -20,9 +20,7 @@ export function HabitGridRow({ habit, weekLogs, onToggle }: HabitGridRowProps) {
     return (
         <View style={[styles.container, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <View style={styles.leftSection}>
-                <View style={[styles.iconContainer, { backgroundColor: habit.color + '20' }]}>
-                    <Text style={styles.icon}>{habit.icon}</Text>
-                </View>
+
                 <View style={styles.habitInfo}>
                     <Text style={[styles.habitName, { color: colors.text }]} numberOfLines={1}>
                         {habit.name}
