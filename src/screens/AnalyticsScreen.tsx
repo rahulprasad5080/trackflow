@@ -1,7 +1,7 @@
 import { useFocusEffect } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { LineChart } from 'react-native-gifted-charts';
+
 import { Calendar } from '../components/Calendar';
 import { HabitPerformanceCard } from '../components/HabitPerformanceCard';
 import { HeatSquare } from '../components/HeatSquare';
@@ -43,79 +43,14 @@ export default function AnalyticsScreen() {
         return found ? found.count : 0;
     };
 
-    // Mock data for the chart
-    const lineData = [
-        { value: 320, label: 'M' },
-        { value: 280, label: 'T' },
-        { value: 290, label: 'W' },
-        { value: 450, label: 'T' }, // Peak
-        { value: 380, label: 'F' },
-        { value: 120, label: 'S' },
-        { value: 200, label: 'S' },
-    ];
+
 
     return (
         <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={styles.content}>
                 <Text style={[styles.title, { color: colors.text }]}>Analytics</Text>
 
-                <View style={[styles.chartCard, { backgroundColor: colors.card }]}>
-                    <View style={styles.chartHeader}>
-                        <Text style={[styles.chartTitle, { color: colors.text }]}>Weekly Progress</Text>
-                        <Text style={[styles.chartSubtitle, { color: colors.textSecondary }]}>15 April - 21 April</Text>
-                    </View>
 
-                    <LineChart
-                        areaChart
-                        curved
-                        data={lineData}
-                        height={200}
-                        spacing={44}
-                        initialSpacing={20}
-                        color1="#007AFF"
-                        startFillColor1="#007AFF"
-                        endFillColor1="#FFFFFF"
-                        startOpacity={0.8}
-                        endOpacity={0.1}
-                        hideDataPoints={false}
-                        dataPointsColor="#007AFF"
-                        dataPointsRadius={4}
-                        thickness={2}
-                        hideRules
-                        hideYAxisText
-                        yAxisColor="transparent"
-                        xAxisColor="transparent"
-                        xAxisLabelTextStyle={{ color: colors.textSecondary, fontSize: 12 }}
-                        pointerConfig={{
-                            pointerStripHeight: 160,
-                            pointerStripColor: 'lightgray',
-                            pointerStripWidth: 2,
-                            pointerColor: 'lightgray',
-                            radius: 6,
-                            pointerLabelWidth: 100,
-                            pointerLabelHeight: 90,
-                            activatePointersOnLongPress: false,
-                            autoAdjustPointerLabelPosition: false,
-                            pointerLabelComponent: (items: any) => {
-                                return (
-                                    <View
-                                        style={{
-                                            height: 90,
-                                            width: 100,
-                                            justifyContent: 'center',
-                                            marginTop: -30,
-                                            marginLeft: -40,
-                                        }}>
-                                        <View style={{ padding: 6, borderRadius: 8, backgroundColor: '#fff', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 }}>
-                                            <Text style={{ fontWeight: 'bold', textAlign: 'center', color: '#000' }}>{items[0].value}</Text>
-                                            <Text style={{ fontSize: 10, textAlign: 'center', color: 'gray' }}>additional text</Text>
-                                        </View>
-                                    </View>
-                                );
-                            },
-                        }}
-                    />
-                </View>
 
                 {/* Best Performing Habits */}
                 {bestHabits.length > 0 && (
