@@ -3,10 +3,13 @@ import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useState } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { AnalyticsChart } from '../components/AnalyticsChart';
+import { CompletionStats } from '../components/CompletionStats';
 import { HabitCard } from '../components/HabitCard';
 import { HabitFilterChips } from '../components/HabitFilterChips';
-import { SummaryCard } from '../components/SummaryCard';
+import { HabitGridRow } from '../components/HabitGridRow';
+import { ViewModeToggle } from '../components/ViewModeToggle';
 import { useTheme } from '../constants/theme';
 import { habitService } from '../database/habitService';
 import { RootStackParamList, TabParamList } from '../navigation/AppNavigator';
@@ -21,23 +24,70 @@ type Props = CompositeScreenProps<
 export default function DashboardScreen({ navigation }: Props) {
     const { colors } = useTheme();
     const [habits, setHabits] = useState<Habit[]>([]);
-    const [logs, setLogs] = useState<any[]>([]);
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [filterId, setFilterId] = useState<number | null>(null);
     const [refreshing, setRefreshing] = useState(false);
+    const [weekLogs, setWeekLogs] = useState<Map<number, { date: string; completed: boolean }[]>>(new Map());
+    const [streakData, setStreakData] = useState<{ current: number; best: number }>({ current: 0, best: 0 });
+    const [chartData, setChartData] = useState<{ value: number; label: string; date: string }[]>([]);
+
     const today = getToday();
+
+    // Generate last 7 days
+    const getLast7Days = () => {
+        const days = [];
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            days.push(date.toISOString().split('T')[0]);
+        }
+        return days;
+    };
 
     const loadData = async () => {
         const allHabits = await habitService.getHabits();
-        const dailyLogs = await habitService.getDailyLogs(today);
+        setHabits(allHabits);
 
-        // Merge logs into habits
-        const merged = allHabits.map(h => {
-            const log = dailyLogs.find(l => l.id === h.id);
-            return { ...h, ...log, value: log?.value || 0, completed: log?.completed || 0 };
+        // Load weekly logs for all habits
+        const dates = getLast7Days();
+        const logsMap = await habitService.getWeeklyLogsForAllHabits(dates);
+
+        // Create week logs structure for each habit
+        const habitWeekLogs = new Map<number, { date: string; completed: boolean }[]>();
+        allHabits.forEach(habit => {
+            const habitLogs = logsMap.get(habit.id);
+            const weekData = dates.map(date => ({
+                date,
+                completed: habitLogs?.get(date)?.completed === 1 || false,
+            }));
+            habitWeekLogs.set(habit.id, weekData);
         });
+        setWeekLogs(habitWeekLogs);
 
-        setHabits(merged);
-        setLogs(dailyLogs);
+        // Calculate overall streak (using first habit for demo, can be enhanced)
+        if (allHabits.length > 0) {
+            const streak = await habitService.getStreak(allHabits[0].id);
+            setStreakData(streak);
+        }
+
+        // Prepare chart data (total completions per day)
+        const dailyCompletions = dates.map((date, index) => {
+            let totalCompleted = 0;
+            allHabits.forEach(habit => {
+                const habitLogs = logsMap.get(habit.id);
+                if (habitLogs?.get(date)?.completed === 1) {
+                    totalCompleted++;
+                }
+            });
+            const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const dayOfWeek = new Date(date).getDay();
+            return {
+                value: totalCompleted,
+                label: dayLabels[dayOfWeek],
+                date,
+            };
+        });
+        setChartData(dailyCompletions);
     };
 
     useFocusEffect(
@@ -52,6 +102,11 @@ export default function DashboardScreen({ navigation }: Props) {
         setRefreshing(false);
     };
 
+    const handleToggleCompletion = async (habitId: number, date: string, completed: boolean) => {
+        await habitService.toggleCompletion(habitId, date, completed);
+        loadData(); // Refresh UI
+    };
+
     const handleLog = async (habit: Habit) => {
         const newValue = (habit.value || 0) + 1;
         await habitService.logHabit(habit.id, today, newValue);
@@ -62,9 +117,12 @@ export default function DashboardScreen({ navigation }: Props) {
         ? habits.filter(h => h.id === filterId)
         : habits;
 
-    const completedCount = habits.filter(h => h.completed).length;
-    const totalCount = habits.length;
-    const progress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+    // Calculate stats
+    const weeklyTotal = habits.length * 7;
+    const weeklyCompletions = Array.from(weekLogs.values()).reduce((sum, logs) => {
+        return sum + logs.filter(log => log.completed).length;
+    }, 0);
+    const successRate = weeklyTotal > 0 ? Math.round((weeklyCompletions / weeklyTotal) * 100) : 0;
 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -72,27 +130,70 @@ export default function DashboardScreen({ navigation }: Props) {
                 contentContainerStyle={styles.content}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             >
-                <View style={styles.summaryContainer}>
-                    <SummaryCard title="Today's Score" value={`${progress}%`} subtitle={`${completedCount}/${totalCount} Done`} />
-                    <SummaryCard title="Current Streak" value="5 Days" subtitle="Best: 12 Days" />
+                {/* Stats Cards */}
+                <CompletionStats
+                    currentStreak={streakData.current}
+                    bestStreak={streakData.best}
+                    weeklyCompletions={weeklyCompletions}
+                    weeklyTotal={weeklyTotal}
+                    successRate={successRate}
+                />
+
+                {/* View Mode Toggle */}
+                <View style={styles.toggleContainer}>
+                    <ViewModeToggle mode={viewMode} onToggle={setViewMode} />
                 </View>
 
+                {/* Filter Chips */}
                 <HabitFilterChips
                     habits={habits}
                     selectedId={filterId}
                     onSelect={setFilterId}
                 />
 
+                {/* Habits List/Grid */}
                 <View style={styles.list}>
-                    {filteredHabits.map(habit => (
-                        <HabitCard
-                            key={habit.id}
-                            habit={habit}
-                            onLog={handleLog}
-                            onDetail={() => navigation.navigate('HabitDetail', { habit })}
-                        />
-                    ))}
+                    {viewMode === 'grid' ? (
+                        filteredHabits.map(habit => (
+                            <HabitGridRow
+                                key={habit.id}
+                                habit={habit}
+                                weekLogs={weekLogs.get(habit.id) || []}
+                                onToggle={handleToggleCompletion}
+                            />
+                        ))
+                    ) : (
+                        filteredHabits.map(habit => (
+                            <HabitCard
+                                key={habit.id}
+                                habit={habit}
+                                onLog={handleLog}
+                                onDetail={() => navigation.navigate('HabitDetail', { habit })}
+                            />
+                        ))
+                    )}
                 </View>
+
+                {/* Analytics Section */}
+                {habits.length > 0 && (
+                    <View style={styles.analyticsSection}>
+                        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                            📊 Analytics
+                        </Text>
+                        <AnalyticsChart
+                            data={chartData}
+                            title="Daily Completions (Last 7 Days)"
+                            type="bar"
+                            color="#8b5cf6"
+                        />
+                        <AnalyticsChart
+                            data={chartData}
+                            title="Completion Trend"
+                            type="line"
+                            color="#10b981"
+                        />
+                    </View>
+                )}
             </ScrollView>
 
             <TouchableOpacity
@@ -113,13 +214,21 @@ const styles = StyleSheet.create({
         paddingVertical: 16,
         paddingBottom: 80, // Add padding for FAB
     },
-    summaryContainer: {
-        flexDirection: 'row',
-        paddingHorizontal: 10,
-        marginBottom: 24,
+    toggleContainer: {
+        paddingHorizontal: 16,
+        marginBottom: 16,
     },
     list: {
         paddingHorizontal: 16,
+    },
+    analyticsSection: {
+        marginTop: 24,
+        paddingHorizontal: 16,
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        marginBottom: 16,
     },
     fab: {
         position: 'absolute',

@@ -60,5 +60,106 @@ export const habitService = {
        WHERE h.archived = 0`,
             [date]
         );
-    }
+    },
+
+    // Get logs for a specific habit over a date range
+    getHabitLogs: async (habitId: number, startDate: string, endDate: string): Promise<Log[]> => {
+        const db = getDB();
+        return await db.getAllAsync<Log>(
+            `SELECT * FROM logs 
+             WHERE habit_id = ? AND date >= ? AND date <= ?
+             ORDER BY date ASC`,
+            [habitId, startDate, endDate]
+        );
+    },
+
+    // Get weekly logs for all habits
+    getWeeklyLogsForAllHabits: async (dates: string[]): Promise<Map<number, Map<string, Log>>> => {
+        const db = getDB();
+        const placeholders = dates.map(() => '?').join(',');
+        const logs = await db.getAllAsync<Log>(
+            `SELECT * FROM logs WHERE date IN (${placeholders})`,
+            dates
+        );
+
+        // Organize logs by habit_id and date
+        const logMap = new Map<number, Map<string, Log>>();
+        logs.forEach(log => {
+            if (!logMap.has(log.habit_id)) {
+                logMap.set(log.habit_id, new Map());
+            }
+            logMap.get(log.habit_id)!.set(log.date, log);
+        });
+
+        return logMap;
+    },
+
+    // Calculate streak for a habit
+    getStreak: async (habitId: number): Promise<{ current: number; best: number }> => {
+        const db = getDB();
+        const logs = await db.getAllAsync<Log>(
+            `SELECT date, completed FROM logs 
+             WHERE habit_id = ? AND completed = 1
+             ORDER BY date DESC`,
+            [habitId]
+        );
+
+        let currentStreak = 0;
+        let bestStreak = 0;
+        let tempStreak = 0;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        for (let i = 0; i < logs.length; i++) {
+            const logDate = new Date(logs[i].date);
+            logDate.setHours(0, 0, 0, 0);
+
+            if (i === 0) {
+                const daysDiff = Math.floor((today.getTime() - logDate.getTime()) / (1000 * 60 * 60 * 24));
+                if (daysDiff <= 1) {
+                    currentStreak = 1;
+                    tempStreak = 1;
+                }
+            } else {
+                const prevDate = new Date(logs[i - 1].date);
+                prevDate.setHours(0, 0, 0, 0);
+                const daysDiff = Math.floor((prevDate.getTime() - logDate.getTime()) / (1000 * 60 * 60 * 24));
+
+                if (daysDiff === 1) {
+                    tempStreak++;
+                    if (i === 1 || currentStreak > 0) {
+                        currentStreak = tempStreak;
+                    }
+                } else {
+                    tempStreak = 1;
+                }
+            }
+
+            bestStreak = Math.max(bestStreak, tempStreak);
+        }
+
+        return { current: currentStreak, best: bestStreak };
+    },
+
+    // Toggle completion status for a specific date
+    toggleCompletion: async (habitId: number, date: string, completed: boolean): Promise<void> => {
+        const db = getDB();
+        const existing = await db.getFirstAsync<Log>(
+            'SELECT * FROM logs WHERE habit_id = ? AND date = ?',
+            [habitId, date]
+        );
+
+        if (existing) {
+            await db.runAsync(
+                'UPDATE logs SET completed = ? WHERE id = ?',
+                [completed ? 1 : 0, existing.id]
+            );
+        } else {
+            await db.runAsync(
+                'INSERT INTO logs (habit_id, date, value, completed) VALUES (?, ?, ?, ?)',
+                [habitId, date, completed ? 1 : 0, completed ? 1 : 0]
+            );
+        }
+    },
 };
