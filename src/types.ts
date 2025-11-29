@@ -45,6 +45,16 @@ export interface ThemeColors {
     danger: string;
 }
 
+export interface HabitPerformance {
+    id: number;
+    name: string;
+    icon: string;
+    color: string;
+    completionRate: number;
+    completedDays: number;
+    totalDays: number;
+}
+
 export interface ThemePalette {
     primary: string;
     secondary: string;

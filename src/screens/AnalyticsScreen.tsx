@@ -1,11 +1,15 @@
+import { useFocusEffect } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { Calendar } from '../components/Calendar';
+import { HabitPerformanceCard } from '../components/HabitPerformanceCard';
 import { HeatSquare } from '../components/HeatSquare';
 import { MonthSwitcher } from '../components/MonthSwitcher';
 import { useTheme } from '../constants/theme';
+import { analyticsService } from '../database/analyticsService';
 import { useHeatmapData } from '../hooks/useHeatmapData';
+import { HabitPerformance } from '../types';
 import { getHeatmapColor } from '../utils/colorUtils';
 import { getMonthDays, getNextMonth, getPreviousMonth, isSameDate } from '../utils/dateUtils';
 
@@ -14,6 +18,25 @@ export default function AnalyticsScreen() {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const heatmapData = useHeatmapData(currentMonth);
     const days = getMonthDays(currentMonth);
+    const [bestHabits, setBestHabits] = useState<HabitPerformance[]>([]);
+    const [worstHabits, setWorstHabits] = useState<HabitPerformance[]>([]);
+
+    // Load performance data
+    useFocusEffect(
+        React.useCallback(() => {
+            loadPerformanceData();
+        }, [])
+    );
+
+    const loadPerformanceData = async () => {
+        try {
+            const { best, worst } = await analyticsService.getHabitPerformance(30);
+            setBestHabits(best);
+            setWorstHabits(worst);
+        } catch (error) {
+            console.error('Error loading performance data:', error);
+        }
+    };
 
     const getCountForDay = (date: Date) => {
         const found = heatmapData.find(d => isSameDate(d.date, date));
@@ -94,6 +117,48 @@ export default function AnalyticsScreen() {
                     />
                 </View>
 
+                {/* Best Performing Habits */}
+                {bestHabits.length > 0 && (
+                    <>
+                        <Text style={[styles.sectionTitle, { color: colors.text }]}>🏆 Best Performing Habits</Text>
+                        <View style={styles.performanceSection}>
+                            {bestHabits.map((habit) => (
+                                <HabitPerformanceCard
+                                    key={habit.id}
+                                    name={habit.name}
+                                    icon={habit.icon}
+                                    color={habit.color}
+                                    completionRate={habit.completionRate}
+                                    completedDays={habit.completedDays}
+                                    totalDays={habit.totalDays}
+                                    variant="best"
+                                />
+                            ))}
+                        </View>
+                    </>
+                )}
+
+                {/* Worst Performing Habits */}
+                {worstHabits.length > 0 && bestHabits.length > 3 && (
+                    <>
+                        <Text style={[styles.sectionTitle, { color: colors.text }]}>📊 Needs Improvement</Text>
+                        <View style={styles.performanceSection}>
+                            {worstHabits.map((habit) => (
+                                <HabitPerformanceCard
+                                    key={habit.id}
+                                    name={habit.name}
+                                    icon={habit.icon}
+                                    color={habit.color}
+                                    completionRate={habit.completionRate}
+                                    completedDays={habit.completedDays}
+                                    totalDays={habit.totalDays}
+                                    variant="worst"
+                                />
+                            ))}
+                        </View>
+                    </>
+                )}
+
                 <Text style={[styles.sectionTitle, { color: colors.text }]}>Activity Calendar</Text>
 
                 <MonthSwitcher
@@ -172,5 +237,8 @@ const styles = StyleSheet.create({
     },
     chartSubtitle: {
         fontSize: 14,
+    },
+    performanceSection: {
+        marginBottom: 8,
     },
 });
