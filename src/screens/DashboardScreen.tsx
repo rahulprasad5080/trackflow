@@ -6,10 +6,8 @@ import React, { useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { AnalyticsChart } from '../components/AnalyticsChart';
 import { CompletionStats } from '../components/CompletionStats';
-import { HabitCard } from '../components/HabitCard';
 import { HabitFilterChips } from '../components/HabitFilterChips';
 import { HabitGridRow } from '../components/HabitGridRow';
-import { ViewModeToggle } from '../components/ViewModeToggle';
 import { useTheme } from '../constants/theme';
 import { habitService } from '../database/habitService';
 import { RootStackParamList, TabParamList } from '../navigation/AppNavigator';
@@ -24,7 +22,7 @@ type Props = CompositeScreenProps<
 export default function DashboardScreen({ navigation }: Props) {
     const { colors } = useTheme();
     const [habits, setHabits] = useState<Habit[]>([]);
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
     const [filterId, setFilterId] = useState<number | null>(null);
     const [refreshing, setRefreshing] = useState(false);
     const [weekLogs, setWeekLogs] = useState<Map<number, { date: string; completed: boolean }[]>>(new Map());
@@ -139,10 +137,7 @@ export default function DashboardScreen({ navigation }: Props) {
                     successRate={successRate}
                 />
 
-                {/* View Mode Toggle */}
-                <View style={styles.toggleContainer}>
-                    <ViewModeToggle mode={viewMode} onToggle={setViewMode} />
-                </View>
+
 
                 {/* Filter Chips */}
                 <HabitFilterChips
@@ -151,27 +146,16 @@ export default function DashboardScreen({ navigation }: Props) {
                     onSelect={setFilterId}
                 />
 
-                {/* Habits List/Grid */}
+                {/* Habits Grid */}
                 <View style={styles.list}>
-                    {viewMode === 'grid' ? (
-                        filteredHabits.map(habit => (
-                            <HabitGridRow
-                                key={habit.id}
-                                habit={habit}
-                                weekLogs={weekLogs.get(habit.id) || []}
-                                onToggle={handleToggleCompletion}
-                            />
-                        ))
-                    ) : (
-                        filteredHabits.map(habit => (
-                            <HabitCard
-                                key={habit.id}
-                                habit={habit}
-                                onLog={handleLog}
-                                onDetail={() => navigation.navigate('HabitDetail', { habit })}
-                            />
-                        ))
-                    )}
+                    {filteredHabits.map(habit => (
+                        <HabitGridRow
+                            key={habit.id}
+                            habit={habit}
+                            weekLogs={weekLogs.get(habit.id) || []}
+                            onToggle={handleToggleCompletion}
+                        />
+                    ))}
                 </View>
 
                 {/* Analytics Section */}
@@ -214,10 +198,7 @@ const styles = StyleSheet.create({
         paddingVertical: 16,
         paddingBottom: 80, // Add padding for FAB
     },
-    toggleContainer: {
-        paddingHorizontal: 16,
-        marginBottom: 16,
-    },
+
     list: {
         paddingHorizontal: 16,
     },

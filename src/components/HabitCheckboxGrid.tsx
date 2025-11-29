@@ -17,8 +17,11 @@ export function HabitCheckboxGrid({ habitId, habitColor, weekLogs, onToggle }: H
     const { colors } = useTheme();
 
     const handleToggle = (date: string, currentCompleted: boolean) => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        onToggle(habitId, date, !currentCompleted);
+        // Only allow checking, not unchecking
+        if (!currentCompleted) {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            onToggle(habitId, date, true);
+        }
     };
 
     return (
