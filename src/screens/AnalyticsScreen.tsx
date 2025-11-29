@@ -120,9 +120,9 @@ export default function AnalyticsScreen() {
                 {/* Best Performing Habits */}
                 {bestHabits.length > 0 && (
                     <>
-                        <Text style={[styles.sectionTitle, { color: colors.text }]}>🏆 Best Performing Habits</Text>
+                        <Text style={[styles.sectionTitle, { color: colors.text }]}>🏆 Best Performing Habit</Text>
                         <View style={styles.performanceSection}>
-                            {bestHabits.map((habit) => (
+                            {bestHabits.slice(0, 1).map((habit) => (
                                 <HabitPerformanceCard
                                     key={habit.id}
                                     name={habit.name}
@@ -139,11 +139,11 @@ export default function AnalyticsScreen() {
                 )}
 
                 {/* Worst Performing Habits */}
-                {worstHabits.length > 0 && bestHabits.length > 3 && (
+                {worstHabits.length > 0 && (bestHabits.length === 0 || worstHabits[0].id !== bestHabits[0].id) && (
                     <>
                         <Text style={[styles.sectionTitle, { color: colors.text }]}>📊 Needs Improvement</Text>
                         <View style={styles.performanceSection}>
-                            {worstHabits.map((habit) => (
+                            {worstHabits.slice(0, 1).map((habit) => (
                                 <HabitPerformanceCard
                                     key={habit.id}
                                     name={habit.name}
