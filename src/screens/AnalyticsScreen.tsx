@@ -147,32 +147,7 @@ const styles = StyleSheet.create({
         gap: 4,
         justifyContent: 'center',
     },
-    chartCard: {
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 24,
-        alignItems: 'center',
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3.84,
-        elevation: 5,
-    },
-    chartHeader: {
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    chartTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 4,
-    },
-    chartSubtitle: {
-        fontSize: 14,
-    },
+
     performanceSection: {
         marginBottom: 8,
     },
