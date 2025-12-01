@@ -12,8 +12,8 @@ import AddHabitScreen from '../screens/AddHabitScreen';
 import AnalyticsScreen from '../screens/AnalyticsScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import HabitDetailScreen from '../screens/HabitDetailScreen';
-
 import SettingsScreen from '../screens/SettingsScreen';
+import TaskScreen from '../screens/TaskScreen';
 
 export type RootStackParamList = {
     Main: undefined;
@@ -25,7 +25,7 @@ export type RootStackParamList = {
 export type TabParamList = {
     Dashboard: undefined;
     Analytics: undefined;
-
+    Tasks: undefined;
     Settings: undefined;
 };
 
@@ -45,7 +45,8 @@ function TabNavigator() {
                         iconName = focused ? 'home' : 'home-outline';
                     } else if (route.name === 'Analytics') {
                         iconName = focused ? 'bar-chart' : 'bar-chart-outline';
-
+                    } else if (route.name === 'Tasks') {
+                        iconName = focused ? 'list' : 'list-outline';
                     } else if (route.name === 'Settings') {
                         iconName = focused ? 'settings' : 'settings-outline';
                     }
@@ -66,7 +67,7 @@ function TabNavigator() {
         >
             <Tab.Screen name="Dashboard" component={DashboardScreen} />
             <Tab.Screen name="Analytics" component={AnalyticsScreen} />
-
+            <Tab.Screen name="Tasks" component={TaskScreen} />
             <Tab.Screen name="Settings" component={SettingsScreen} />
         </Tab.Navigator>
     );

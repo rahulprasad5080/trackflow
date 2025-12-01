@@ -71,3 +71,10 @@ export interface ThemePalette {
         dark4: string;
     };
 }
+
+export interface Task {
+    id: number;
+    text: string;
+    completed: number; // 0 or 1
+    created_at: string;
+}

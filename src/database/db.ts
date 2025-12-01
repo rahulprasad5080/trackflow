@@ -37,6 +37,13 @@ export const initDB = async (): Promise<SQLite.SQLiteDatabase> => {
       enabled INTEGER DEFAULT 1, -- Boolean 0 or 1
       FOREIGN KEY (habit_id) REFERENCES habits (id) ON DELETE CASCADE
     );
+
+    CREATE TABLE IF NOT EXISTS tasks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      text TEXT NOT NULL,
+      completed INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 
   // Migration: Add enabled column if it doesn't exist
