@@ -137,7 +137,7 @@ export default function DashboardScreen({ navigation }: Props) {
                     successRate={successRate}
                 />
 
-                <HabitChart data={chartData} />
+
 
                 {/* Filter Chips */}
                 <HabitFilterChips
@@ -157,7 +157,7 @@ export default function DashboardScreen({ navigation }: Props) {
                         />
                     ))}
                 </View>
-
+                <HabitChart data={chartData} />
             </ScrollView>
 
             <TouchableOpacity

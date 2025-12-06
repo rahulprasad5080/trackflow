@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Calendar } from '../components/Calendar';
-import { HabitPerformanceCard } from '../components/HabitPerformanceCard';
 import { HeatSquare } from '../components/HeatSquare';
 import { MonthSwitcher } from '../components/MonthSwitcher';
 import { useTheme } from '../constants/theme';
@@ -48,54 +47,6 @@ export default function AnalyticsScreen() {
     return (
         <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={styles.content}>
-                <Text style={[styles.title, { color: colors.text }]}>Analytics</Text>
-
-
-
-                {/* Best Performing Habits */}
-                {bestHabits.length > 0 && (
-                    <>
-                        <Text style={[styles.sectionTitle, { color: colors.text }]}>🏆 Best Performing Habit</Text>
-                        <View style={styles.performanceSection}>
-                            {bestHabits.slice(0, 1).map((habit) => (
-                                <HabitPerformanceCard
-                                    key={habit.id}
-                                    name={habit.name}
-                                    icon={habit.icon}
-                                    color={habit.color}
-                                    completionRate={habit.completionRate}
-                                    completedDays={habit.completedDays}
-                                    totalDays={habit.totalDays}
-                                    variant="best"
-                                />
-                            ))}
-                        </View>
-                    </>
-                )}
-
-                {/* Worst Performing Habits */}
-                {worstHabits.length > 0 && (bestHabits.length === 0 || worstHabits[0].id !== bestHabits[0].id) && (
-                    <>
-                        <Text style={[styles.sectionTitle, { color: colors.text }]}>📊 Needs Improvement</Text>
-                        <View style={styles.performanceSection}>
-                            {worstHabits.slice(0, 1).map((habit) => (
-                                <HabitPerformanceCard
-                                    key={habit.id}
-                                    name={habit.name}
-                                    icon={habit.icon}
-                                    color={habit.color}
-                                    completionRate={habit.completionRate}
-                                    completedDays={habit.completedDays}
-                                    totalDays={habit.totalDays}
-                                    variant="worst"
-                                />
-                            ))}
-                        </View>
-                    </>
-                )}
-
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>Activity Calendar</Text>
-
                 <MonthSwitcher
                     currentMonth={currentMonth}
                     onPrev={() => setCurrentMonth(getPreviousMonth(currentMonth))}
