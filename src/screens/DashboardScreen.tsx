@@ -5,6 +5,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { CompletionStats } from '../components/CompletionStats';
+import { HabitChart } from '../components/HabitChart';
 import { HabitFilterChips } from '../components/HabitFilterChips';
 import { HabitGridRow } from '../components/HabitGridRow';
 import { useTheme } from '../constants/theme';
@@ -136,7 +137,7 @@ export default function DashboardScreen({ navigation }: Props) {
                     successRate={successRate}
                 />
 
-
+                <HabitChart data={chartData} />
 
                 {/* Filter Chips */}
                 <HabitFilterChips
