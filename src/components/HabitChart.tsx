@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { useTheme } from '../constants/theme';
 
@@ -9,10 +9,11 @@ interface HabitChartProps {
 
 export const HabitChart = ({ data }: HabitChartProps) => {
     const { colors } = useTheme();
+    const screenWidth = Dimensions.get('window').width;
 
-    if (!data || data.length === 0) {
-        return null;
-    }
+    if (!data || data.length === 0) return null;
+
+    const spacing = (screenWidth - 60) / data.length;
 
     const chartData = data.map(item => ({
         value: item.value,
@@ -24,33 +25,42 @@ export const HabitChart = ({ data }: HabitChartProps) => {
     }));
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.card }]}>
+        <View style={[styles.container, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <Text style={[styles.title, { color: colors.text }]}>Weekly Progress</Text>
-            <View style={styles.chartContainer}>
-                <LineChart
-                    data={chartData}
-                    areaChart
-                    curved
-                    isAnimated
-                    color={colors.tint}
-                    startFillColor={colors.tint}
-                    startOpacity={0.8}
-                    endFillColor={colors.tint}
-                    endOpacity={0.3}
-                    thickness={3}
-                    dataPointsColor={colors.tint}
-                    dataPointsRadius={4}
-                    hideRules
-                    xAxisColor={colors.border}
-                    yAxisColor={colors.border}
-                    xAxisThickness={1}
-                    yAxisThickness={1}
-                    xAxisLabelTextStyle={{ color: colors.text, fontSize: 10 }}
-                    yAxisTextStyle={{ color: colors.text, fontSize: 10 }}
-                    initialSpacing={20}
-                    spacing={40}
-                />
-            </View>
+
+            <LineChart
+                data={chartData}
+                curved
+                areaChart
+                isAnimated
+                color={colors.tint}
+                startFillColor={colors.tint}
+                endFillColor={colors.tint}
+                startOpacity={0.7}
+                endOpacity={0.2}
+                thickness={3}
+                dataPointsColor={colors.tint}
+                dataPointsRadius={4}
+
+                // ⭐ SHOW X & Y AXIS BORDER ⭐
+                xAxisThickness={1}
+                yAxisThickness={1}
+                xAxisColor={colors.border}
+                yAxisColor={colors.border}
+
+                // Show horizontal grid lines if needed
+                hideRules={true}
+                rulesColor={colors.border}
+
+                // Fix cutoff issue
+                width={screenWidth - 32}
+                initialSpacing={10}
+                endSpacing={10}
+                spacing={spacing}
+
+                xAxisLabelTextStyle={{ color: colors.text, fontSize: 10 }}
+                yAxisTextStyle={{ color: colors.text, fontSize: 10 }}
+            />
         </View>
     );
 };
@@ -62,22 +72,10 @@ const styles = StyleSheet.create({
         padding: 16,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: 'rgba(0,0,0,0.05)',
-        elevation: 2,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
     },
     title: {
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 16,
-    },
-    chartContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        // Overflow hidden might cut off labels, so be careful
-        overflow: 'visible',
     },
 });
