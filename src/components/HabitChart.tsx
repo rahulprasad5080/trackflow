@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { BarChart } from 'react-native-gifted-charts';
+import { LineChart } from 'react-native-gifted-charts';
 import { useTheme } from '../constants/theme';
 
 interface HabitChartProps {
@@ -14,38 +14,41 @@ export const HabitChart = ({ data }: HabitChartProps) => {
         return null;
     }
 
-    // Transform data for the chart library if needed, but currently it matches closely.
-    // We want to style the bars.
     const chartData = data.map(item => ({
         value: item.value,
         label: item.label,
-        frontColor: colors.tint,
-        topLabelComponent: () => (
-            <Text style={{ color: colors.text, fontSize: 10, marginBottom: 2 }}>
-                {item.value > 0 ? item.value : ''}
-            </Text>
-        ),
+        dataPointText: item.value > 0 ? item.value.toString() : '',
+        textColor: colors.text,
+        textShiftY: -10,
+        textFontSize: 10,
     }));
 
     return (
         <View style={[styles.container, { backgroundColor: colors.card }]}>
             <Text style={[styles.title, { color: colors.text }]}>Weekly Progress</Text>
             <View style={styles.chartContainer}>
-                <BarChart
+                <LineChart
                     data={chartData}
-                    barWidth={30}
-                    noOfSections={4}
-                    barBorderRadius={4}
-                    frontColor={colors.tint}
-                    yAxisThickness={0}
-                    xAxisThickness={0}
-                    xAxisLabelTextStyle={{ color: colors.text, fontSize: 10 }}
-                    yAxisTextStyle={{ color: colors.text, fontSize: 10 }}
-                    initialSpacing={10}
-                    spacing={20}
-                    hideRules
-                    showYAxisIndices={false}
+                    areaChart
+                    curved
                     isAnimated
+                    color={colors.tint}
+                    startFillColor={colors.tint}
+                    startOpacity={0.8}
+                    endFillColor={colors.tint}
+                    endOpacity={0.3}
+                    thickness={3}
+                    dataPointsColor={colors.tint}
+                    dataPointsRadius={4}
+                    hideRules
+                    hideYAxisText
+                    xAxisColor={colors.border}
+                    yAxisColor={colors.border}
+                    xAxisThickness={1}
+                    yAxisThickness={0}
+                    xAxisLabelTextStyle={{ color: colors.text, fontSize: 10 }}
+                    initialSpacing={20}
+                    spacing={40}
                 />
             </View>
         </View>
