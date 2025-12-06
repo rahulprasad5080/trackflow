@@ -41,12 +41,12 @@ export const HabitChart = ({ data }: HabitChartProps) => {
                     dataPointsColor={colors.tint}
                     dataPointsRadius={4}
                     hideRules
-                    hideYAxisText
                     xAxisColor={colors.border}
                     yAxisColor={colors.border}
                     xAxisThickness={1}
-                    yAxisThickness={0}
+                    yAxisThickness={1}
                     xAxisLabelTextStyle={{ color: colors.text, fontSize: 10 }}
+                    yAxisTextStyle={{ color: colors.text, fontSize: 10 }}
                     initialSpacing={20}
                     spacing={40}
                 />
@@ -61,6 +61,8 @@ const styles = StyleSheet.create({
         marginVertical: 8,
         padding: 16,
         borderRadius: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(0,0,0,0.05)',
         elevation: 2,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
