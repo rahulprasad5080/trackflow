@@ -3,8 +3,7 @@ import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps, useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useCallback, useState } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { AnalyticsChart } from '../components/AnalyticsChart';
+import { RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { CompletionStats } from '../components/CompletionStats';
 import { HabitFilterChips } from '../components/HabitFilterChips';
 import { HabitGridRow } from '../components/HabitGridRow';
@@ -158,26 +157,6 @@ export default function DashboardScreen({ navigation }: Props) {
                     ))}
                 </View>
 
-                {/* Analytics Section */}
-                {habits.length > 0 && (
-                    <View style={styles.analyticsSection}>
-                        <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                            📊 Analytics
-                        </Text>
-                        <AnalyticsChart
-                            data={chartData}
-                            title="Daily Completions (Last 7 Days)"
-                            type="bar"
-                            color="#8b5cf6"
-                        />
-                        <AnalyticsChart
-                            data={chartData}
-                            title="Completion Trend"
-                            type="line"
-                            color="#10b981"
-                        />
-                    </View>
-                )}
             </ScrollView>
 
             <TouchableOpacity
