@@ -32,11 +32,19 @@ export default function DashboardScreen({ navigation }: Props) {
     const today = getToday();
 
     // Generate last 7 days
-    const getLast7Days = () => {
-        const days = [];
-        for (let i = 6; i >= 0; i--) {
-            const date = new Date();
-            date.setDate(date.getDate() - i);
+    // Generate current week days (Sunday to Saturday)
+    const getCurrentWeekDays = () => {
+        const days: string[] = [];
+        const today = new Date();
+        const currentDay = today.getDay(); // 0 is Sunday
+
+        // Calculate Sunday of this week
+        const startOfWeek = new Date(today);
+        startOfWeek.setDate(today.getDate() - currentDay);
+
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(startOfWeek);
+            date.setDate(startOfWeek.getDate() + i);
             days.push(date.toISOString().split('T')[0]);
         }
         return days;
@@ -47,7 +55,7 @@ export default function DashboardScreen({ navigation }: Props) {
         setHabits(allHabits);
 
         // Load weekly logs for all habits
-        const dates = getLast7Days();
+        const dates = getCurrentWeekDays();
         const logsMap = await habitService.getWeeklyLogsForAllHabits(dates);
 
         // Create week logs structure for each habit
