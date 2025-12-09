@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "trackflow",
-    "slug": "trackflow",
+    "slug": "habit",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -19,7 +19,8 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.trackflow"
     },
     "web": {
       "output": "static",
@@ -44,6 +45,13 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "bd9b454c-4929-4b98-a019-51ec4170b787"
+      }
+    },
+    "owner": "rahul246s-organization"
   }
 }
